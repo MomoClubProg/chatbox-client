@@ -12,24 +12,31 @@ function loginForm(){
     form.addPrompt('Port');
     form.addPrompt('Channel');
 
-    form.addSubmit(function(login){});
+    form.addSubmit((login) => {
+            console.log('\n'+login.username);
+            console.log(login.IP);
+            console.log(login.Port);
+            console.log(login.Channel);
+            form.clear();
+            firstchat(login);
+    });
 
     form.render();
+    
 }
 
-function firstchat(){
+function firstchat(login){
 
-    let chat = new Chat('Grimtek');
+    //let chat = new Chat('Grimtek');
+    let chat = new Chat(login.username);
 
-    chat.addMessage('Grimtek', 'Hello There');
 
     console.log(chat);
 
         chat.addPrompt(function(msg){})
 
+
     chat.render();
 }
 
 loginForm();
-
-firstchat();

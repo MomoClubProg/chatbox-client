@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "tui-chat-components": "^0.0.3"
+    "tui-chat-components": "^0.0.4"
   }
 }
