@@ -1,4 +1,20 @@
-const {Chat} = require('tui-chat-components'), {Form} = require('tui-chat-components');
+const {Chat, Form} = require('tui-chat-components');
+const Socket = require('socket.io-client');
+
+let socket;
+
+function comms(msg){
+
+    //let msg = {user:'Grimtek', message: 'Hello there!'};
+
+    socket.emit('sendMessage', msg);
+    
+   socket.on('receivedMessage', (msg) => {
+
+        console.log(msg);
+
+    });
+}
 
 
 
@@ -17,6 +33,20 @@ function loginForm(){
             console.log(login.IP);
             console.log(login.Port);
             console.log(login.Channel);
+
+            socket = Socket.io('http://'+login.IP+':'+login.Port);
+
+            let loginping = {user: login.username, message: login.username+' has logged in!'};
+            socket.emit('sendMessage', loginping);
+
+            socket.on('receivedMessage', (chatmsg) => {
+
+                
+
+                console.log(chatmsg);
+        
+            });
+
             form.clear();
             firstchat(login);
     });
@@ -27,16 +57,19 @@ function loginForm(){
 
 function firstchat(login){
 
-    //let chat = new Chat('Grimtek');
     let chat = new Chat(login.username);
 
 
     console.log(chat);
 
-        chat.addPrompt(function(msg){})
-
+    chat.addPrompt(function(msg){
+        socket.emit('sendMessage', msg);
+    });
 
     chat.render();
 }
 
+
+
 loginForm();
+//comms();
