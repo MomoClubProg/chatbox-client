@@ -45,14 +45,10 @@ function loginForm(){
             form.clear();
             firstchat(login);
 
-            /*socket.on('postMessage', (chatmsg) => {
+            socket.on('postMessage', (chatmsg) => {
                 //console.log(chatmsg.message);
-                let chat1 = new Chat(login.username);
 
-                chat1.addMessage(chatmsg);
-                form.clear();
-                chat1.render();
-            });*/
+            });
     });
 
     form.render();
@@ -69,6 +65,7 @@ function firstchat(login){
     chat.addPrompt(function(msg){
         socket.emit('sendMessage', msg);
 
+        this.addMessage(chatmsg);
     });
 
 
