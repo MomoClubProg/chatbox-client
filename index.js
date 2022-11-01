@@ -36,19 +36,15 @@ function loginForm(){
 
             socket = Socket.io('http://'+login.IP+':'+login.Port);
 
-            socket.emit('login', login.username);
+            socket.emit('login', login);
 
-            let loginping = {user: login.username, message: login.username+' has logged in!'};
-            socket.emit('sendMessage', loginping);
+            let loginmsg = {username: 'BOT', message: login.username+' has logged in!', Channel: login.Channel};
+            //socket.emit('sendMessage', loginmsg);
 
 
             form.clear();
             firstchat(login);
 
-            socket.on('postMessage', (chatmsg) => {
-                //console.log(chatmsg.message);
-
-            });
     });
 
     form.render();
@@ -62,12 +58,30 @@ function firstchat(login){
 
     console.log(chat);
 
-    chat.addPrompt(function(msg){
-        socket.emit('sendMessage', msg);
+    chat.addPrompt(function({ user, message, userTag }){
+        socket.emit('sendMessage', {
+            username:user,
+            message,
+            userTag
+        });
 
-        this.addMessage(chatmsg);
+        //this.addMessage(msg);
     });
 
+    socket.on('postMessage', (msg) => {
+        //console.log(chatmsg.message);
+        chat.addMessage(msg.username, msg.message);
+
+    });
+
+    socket.on('loginResponse', (data) => {
+        //console.log(data);
+
+        for(let i=0; i<data.length;i++){
+            
+            chat.addMessage(data[i].username, data[i].message);
+        }
+    });
 
     chat.render();
 }
