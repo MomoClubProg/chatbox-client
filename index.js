@@ -1,5 +1,6 @@
 const {Chat, Form} = require('tui-chat-components');
 const Socket = require('socket.io-client');
+const MDE = require('mde_crypt/src/decrypt');
 
 let socket;
 
@@ -54,22 +55,20 @@ function loginForm(){
 function firstchat(login){
 
     let chat = new Chat(login.username);
-
+    const key = login.Channel;
 
     console.log(chat);
 
-    chat.addPrompt(function({ user, message, userTag }){
+    chat.addPrompt(function(data){
         socket.emit('sendMessage', {
-            username:user,
-            message,
-            userTag
+            username: data.user,
+            message: data.message,
+            userTag: data.userTag
         });
-
-        //this.addMessage(msg);
     });
 
     socket.on('postMessage', (msg) => {
-        //console.log(chatmsg.message);
+        console.log(msg);
         chat.addMessage(msg.username, msg.message);
 
     });
@@ -78,7 +77,7 @@ function firstchat(login){
         //console.log(data);
 
         for(let i=0; i<data.length;i++){
-            
+    
             chat.addMessage(data[i].username, data[i].message);
         }
     });
