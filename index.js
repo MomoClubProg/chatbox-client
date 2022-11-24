@@ -1,28 +1,12 @@
 const {Chat, Form} = require('tui-chat-components');
 const Socket = require('socket.io-client');
-const MDE = require('mde_crypt/src/decrypt');
+const MDE = require('mde_crypt');
 
 let socket;
-
-function comms(msg){
-
-    //let msg = {user:'Grimtek', message: 'Hello there!'};
-
-    socket.emit('sendMessage', msg);
-    
-   socket.on('receivedMessage', (msg) => {
-
-        console.log(msg);
-
-    });
-}
-
-
 
 function loginForm(){
 
     let form = new Form();
-
 
     form.addPrompt('username');
     form.addPrompt('IP');
@@ -30,27 +14,21 @@ function loginForm(){
     form.addPrompt('Channel');
 
     form.addSubmit((login) => {
-            console.log('\n'+login.username);
-            console.log(login.IP);
-            console.log(login.Port);
-            console.log(login.Channel);
 
             socket = Socket.io('http://'+login.IP+':'+login.Port);
 
             socket.emit('login', login);
 
             let loginmsg = {username: 'BOT', message: login.username+' has logged in!', Channel: login.Channel};
-            //socket.emit('sendMessage', loginmsg);
-
 
             form.clear();
+
             firstchat(login);
-
     });
-
     form.render();
-    
 }
+
+
 
 function firstchat(login){
 
@@ -60,32 +38,39 @@ function firstchat(login){
     console.log(chat);
 
     chat.addPrompt(function(data){
+
+        let buffer = MDE.Encrypt(data.message, key);
+
         socket.emit('sendMessage', {
             username: data.user,
-            message: data.message,
+            message: buffer.data,
             userTag: data.userTag
         });
     });
 
-    socket.on('postMessage', (msg) => {
-        console.log(msg);
-        chat.addMessage(msg.username, msg.message);
 
+    socket.on('postMessage', (msg) => {
+
+        let decryp = MDE.Decrypt(msg.message, key);
+
+        chat.addMessage(msg.username, decryp.data.toString());
     });
 
     socket.on('loginResponse', (data) => {
-        //console.log(data);
+
+        let startdecryp;
 
         for(let i=0; i<data.length;i++){
-    
-            chat.addMessage(data[i].username, data[i].message);
+            
+            startdecryp = MDE.Decrypt(data[i].message, key);
+
+            console.log(startdecryp, data[i].message);
+
+            chat.addMessage(data[i].username, startdecryp.data.toString());
         }
     });
 
     chat.render();
 }
 
-
-
 loginForm();
-//comms();
