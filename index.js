@@ -19,55 +19,55 @@ function loginForm(){
 
             socket.emit('login', login);
 
-            let loginmsg = {username: 'BOT', message: login.username+' has logged in!', Channel: login.Channel};
-
             form.clear();
-
             firstchat(login);
     });
     form.render();
 }
-
-
 
 function firstchat(login){
 
     let chat = new Chat(login.username);
     const key = login.Channel;
 
-    console.log(chat);
 
     chat.addPrompt(function(data){
 
         let buffer = MDE.Encrypt(data.message, key);
-
         socket.emit('sendMessage', {
             username: data.user,
-            message: buffer.data,
+            message: buffer.data.toString(),
             userTag: data.userTag
         });
     });
 
 
     socket.on('postMessage', (msg) => {
-
-        let decryp = MDE.Decrypt(msg.message, key);
-
-        chat.addMessage(msg.username, decryp.data.toString());
+        chat.addMessage(
+          msg.username,
+          MDE.Decrypt(msg.message, key).data.toString()
+        );
     });
 
-    socket.on('loginResponse', (data) => {
+    socket.on('loginResponse', ({ data, invalid }) => {
+      if (invalid) {
+        chat.clear();
+        loginForm();
 
-        let startdecryp;
+      } 
 
-        for(let i=0; i<data.length;i++){
-            
-            startdecryp = MDE.Decrypt(data[i].message, key);
 
-            console.log(startdecryp, data[i].message);
+     // Display every message
+      for(let i=0; i<data.length;i++){
+        let buf = Buffer.from(data[i].message.toString());
+        let dec = MDE.Decrypt(buf.data, key);
+         
+        chat.addMessage(
+          data[i].username,
+          dec.data
+        );
+      }
 
-            chat.addMessage(data[i].username, startdecryp.data.toString());
-        }
     });
 
     chat.render();
