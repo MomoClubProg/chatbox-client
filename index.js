@@ -36,7 +36,7 @@ function firstchat(login){
         let buffer = MDE.Encrypt(data.message, key);
         socket.emit('sendMessage', {
             username: data.user,
-            message: buffer.data.toString(),
+            message: buffer.data,
             userTag: data.userTag
         });
     });
@@ -56,15 +56,13 @@ function firstchat(login){
 
       } 
 
-
-     // Display every message
+      // Display every message
       for(let i=0; i<data.length;i++){
-        let buf = Buffer.from(data[i].message.toString());
-        let dec = MDE.Decrypt(buf.data, key);
+        let dec = MDE.Decrypt(data[i].message, key);
          
         chat.addMessage(
           data[i].username,
-          dec.data
+          dec.data.toString()
         );
       }
 
