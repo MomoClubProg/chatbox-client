@@ -10,8 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "md5": "^2.3.0",
     "mde_crypt": "^1.0.1",
     "socket.io-client": "^4.5.2",
-    "tui-chat-components": "^0.0.4"
+    "tui-chat-components": "^0.0.5"
   }
 }
