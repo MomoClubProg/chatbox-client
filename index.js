@@ -1,11 +1,8 @@
 const {Chat, Form} = require('tui-chat-components');
 const Socket = require('socket.io-client');
 const MDE = require('mde_crypt');
-<<<<<<< Updated upstream
 const UUID = require('./get_uuid.js');
-=======
 const fs = require('node:fs')
->>>>>>> Stashed changes
 
 let socket;
 
