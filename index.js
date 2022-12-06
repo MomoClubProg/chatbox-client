@@ -1,10 +1,15 @@
 const {Chat, Form} = require('tui-chat-components');
 const Socket = require('socket.io-client');
 const MDE = require('mde_crypt');
+<<<<<<< Updated upstream
 const UUID = require('./get_uuid.js');
+=======
+const fs = require('node:fs')
+>>>>>>> Stashed changes
 
 let socket;
 
+//Login interface
 function loginForm(){
 
     let form = new Form();
@@ -14,11 +19,10 @@ function loginForm(){
     form.addPrompt('Port');
     form.addPrompt('Channel');
 
+    //Login message sent to server
     form.addSubmit((login) => {
 
-            socket = Socket.io('http://'+login.IP+':'+login.Port);
 
-            socket.emit('login', login);
 
             form.clear();
             firstchat(login);
@@ -28,13 +32,16 @@ function loginForm(){
 
 function firstchat(login){
 
+    socket = Socket.io('http://'+login.IP+':'+login.Port);
+    socket.emit('login', login);
+
+    let chat = new Chat(login.username);
     const key = login.Channel;
     const userTag = UUID.get(login.username);
 
-    let chat = new Chat(login.username, userTag);
-    
+    //Message encryption and sending to server
+    chat.addPrompt(function(data){
 
-    chat.addPrompt(function(data){ 
         let buffer = MDE.Encrypt(data.message, key);
         socket.emit('sendMessage', {
             username: data.user,
@@ -43,7 +50,7 @@ function firstchat(login){
         });
     });
 
-
+    //Message receiving from server and decryption
     socket.on('postMessage', (msg) => {
         // Live Messages are just buffers
       chat.addMessage(
@@ -53,6 +60,7 @@ function firstchat(login){
       );
     });
 
+    //Returns to login if form is invalid
     socket.on('loginResponse', ({ data, invalid }) => {
       if (invalid) {
         chat.clear();
@@ -81,4 +89,16 @@ function firstchat(login){
     chat.render();
 }
 
+//Looks for login token and feeds the login info if file is found
+if(fs.existsSync(process.argv[2])){
+
+  rawFile = fs.readFileSync(process.argv[2], "utf-8");
+  
+  login = JSON.parse(rawFile);
+
+  firstchat(login);
+
+}else{
+
 loginForm();
+}
